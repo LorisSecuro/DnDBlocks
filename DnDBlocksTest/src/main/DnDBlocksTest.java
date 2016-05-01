@@ -20,9 +20,11 @@ public class DnDBlocksTest {
 	DnDGrid dndGrid = new DnDGrid(shell, 0, 32, 3);
 
 	new DnDContentText(dndGrid.getCell(12, 1), "Z");
-	DnDContent w = new DnDContentText(dndGrid.getCell(12, 1), "W");
-	DnDContent x = new DnDContentText(dndGrid.getCell(11, 1), "X");
-	DnDContent n11 = new DnDContentText(dndGrid.getCell(13, 1), "11");
+	new DnDContentText(dndGrid.getCell(13, 1), "Q");
+	new DnDContentText(dndGrid.getCell(10, 1), "W");
+	DnDContent x = new DnDContentText(dndGrid.getCell(11, 1), "H");
+	DnDContent w = new DnDContentText(dndGrid.getCell(12, 1), "I");
+	DnDContent n11 = new DnDContentText(dndGrid.getCell(13, 1), "!");
 
 	DnDStructure myStructure = new DnDStructure();
 	myStructure.add(w);

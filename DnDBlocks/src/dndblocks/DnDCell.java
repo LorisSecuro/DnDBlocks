@@ -88,11 +88,28 @@ public class DnDCell extends Canvas {
 	redraw();
     }
 
+    private boolean isOnlyStructureInCell(DnDStructure structure) {
+	for (DnDContent contentInCell : contents) {
+	    DnDStructure structureInCell = contentInCell.getStructure();
+	    if (structure != structureInCell) {
+		return false;
+	    }
+	}
+	return true;
+    }
+
     private void dragEnterOperations() {
 	if (state == State.EMPTY) {
 	    provisionalState = State.FILLED;
 	} else {
-	    provisionalState = State.CONTESTED;
+	    // check if in then target cell there is only content of this structure, if so I don't want the cell to appear contested
+	    DnDStructure draggerStructure = dragger.getContentOnTop()
+		    .getStructure();
+	    if (isOnlyStructureInCell(draggerStructure)) {
+		provisionalState = State.FILLED;
+	    } else {
+		provisionalState = State.CONTESTED;
+	    }
 	}
 
 	redraw();
