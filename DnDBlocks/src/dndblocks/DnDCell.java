@@ -12,7 +12,6 @@ import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.DropTargetListener;
-import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -33,7 +32,6 @@ public class DnDCell extends Canvas {
     private DnDGrid parentGrid;
 
     private static DnDCell dragger = null;
-    private static DnDCell dropReceiver = null;
 
     protected DnDCell(Composite parent, int style) {
 	super(parent, style);
@@ -117,17 +115,12 @@ public class DnDCell extends Canvas {
     private void setupDnD() {
 
 	DropTarget dropTarget = new DropTarget(this, DND.DROP_MOVE);
-	dropTarget.setTransfer(new Transfer[] { TextTransfer.getInstance() });
+	dropTarget
+		.setTransfer(new Transfer[] { DnDDummyTransfer.getInstance() });
 	dropTarget.addDropListener(new DropTargetListener() {
 
 	    @Override
 	    public void dragEnter(DropTargetEvent dropTargetEvent) {
-
-		// I accept only draggers that comes from this application
-		if (dragger == null) {
-		    dropTargetEvent.detail = DND.DROP_NONE;
-		    return;
-		}
 
 		// if the source of drag is myself i don't want anything to happen
 		if (dragger == DnDCell.this) {
@@ -154,11 +147,6 @@ public class DnDCell extends Canvas {
 
 	    @Override
 	    public void dragLeave(DropTargetEvent dropTargetEvent) {
-
-		// I accept only draggers that comes from this application
-		if (dragger == null) {
-		    return;
-		}
 
 		// if the source of drag is myself i don't want anything to happen
 		if (dragger == DnDCell.this) {
@@ -192,11 +180,6 @@ public class DnDCell extends Canvas {
 
 	    @Override
 	    public void drop(DropTargetEvent dropTargetEvent) {
-		// TO DO NO rosso se stessa struttura
-		// not using text anymore... should look in to this
-		/*
-		String text = (String) dropTargetEvent.data;
-		new DnDContentText(DnDCell.this, text);*/
 
 		DnDStructure structure = dragger.getContentOnTop()
 			.getStructure();
@@ -220,10 +203,6 @@ public class DnDCell extends Canvas {
 
 	    @Override
 	    public void dropAccept(DropTargetEvent dropTargetEvent) {
-		// I accept only draggers that comes from this application
-		if (dragger == null) {
-		    dropTargetEvent.detail = DND.DROP_NONE;
-		}
 
 		// if the source of drag is myself I cancel the operation
 		if (dragger == DnDCell.this) {
@@ -240,14 +219,12 @@ public class DnDCell extends Canvas {
 			dropTargetEvent.detail = DND.DROP_NONE;
 		    }
 		}
-
-		// I mark this block as the receiver, so I know it's a valid drop target
-		dropReceiver = DnDCell.this;
 	    }
 	});
 
 	DragSource dragSource = new DragSource(this, DND.DROP_MOVE);
-	dragSource.setTransfer(new Transfer[] { TextTransfer.getInstance() });
+	dragSource
+		.setTransfer(new Transfer[] { DnDDummyTransfer.getInstance() });
 
 	dragSource.addDragListener(new DragSourceListener() {
 	    @Override
@@ -259,6 +236,7 @@ public class DnDCell extends Canvas {
 		    return;
 		}
 
+		// i save the drag source so I can use it during the drop operations
 		dragger = DnDCell.this;
 
 		// the image cause redraw problems while dragging a structure, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=393868
@@ -283,39 +261,11 @@ public class DnDCell extends Canvas {
 
 	    @Override
 	    public void dragFinished(DragSourceEvent dragSourceEvent) {
-		/*
-		// if drag successful I remove my content
-		if (dragSourceEvent.doit
-			&& dragSourceEvent.detail == DND.DROP_MOVE) {
-
-		    DnDStructure structure = dragger.getContentOnTop()
-			    .getStructure();
-		    if (structure != null) {
-			List<DnDContent> structureContents = structure
-				.getContents();
-			for (DnDContent structureContent : structureContents) {
-			    structureContent.getCell().dragFinishedOperations(
-				    structureContent);
-			}
-		    } else {
-			dragFinishedOperations(getContentOnTop());
-		    }
-		}
-		*/
 		dragger = null;
-		dropReceiver = null;
 	    }
 
 	    @Override
 	    public void dragSetData(DragSourceEvent dragSourceEvent) {
-
-		// I accept only drop receivers that comes from this application
-		if (dropReceiver == null) {
-		    dragSourceEvent.doit = false;
-		    return;
-		}
-
-		dragSourceEvent.data = getContentOnTop().getContent();
 	    }
 	});
     }
