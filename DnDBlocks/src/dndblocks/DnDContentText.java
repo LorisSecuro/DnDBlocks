@@ -24,8 +24,8 @@ public class DnDContentText extends DnDContent {
 
 	Point cellSize = getCell().getSize();
 	int clipMargin = 1;
-	gc.setClipping(clipMargin, clipMargin, cellSize.x - clipMargin,
-		cellSize.y - clipMargin);
+	gc.setClipping(clipMargin, clipMargin, cellSize.x - (clipMargin * 2),
+		cellSize.y - (clipMargin * 2));
 
 	double posX = ((double) (cellSize.x)) / 2 - ((double) (textExtent.x))
 		/ 2;
