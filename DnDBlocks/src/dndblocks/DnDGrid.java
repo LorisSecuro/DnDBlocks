@@ -10,7 +10,7 @@ public class DnDGrid extends Composite {
 
     private Map<DnDCell, Point> positionsInGrid = new HashMap<DnDCell, Point>();
     private DnDCell[][] cells;
-    private int blockMargin = 1;
+    private int blockMargin = 0;
     private int blockSize = 14;
 
     public DnDGrid(Composite parent, int style, int numColumns, int numRows) {

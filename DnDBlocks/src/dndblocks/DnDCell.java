@@ -325,6 +325,9 @@ public class DnDCell extends Canvas {
 	e.gc.setBackground(backgroundColor);
 	e.gc.fillRectangle(0, 0, getSize().x, getSize().y);
 
+	e.gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLACK));
+	e.gc.drawRectangle(0, 0, getSize().x, getSize().y);
+
 	if (contents.size() > 0) {
 	    getContentOnTop().paint(e.gc);
 	}

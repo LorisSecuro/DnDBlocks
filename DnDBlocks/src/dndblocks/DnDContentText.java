@@ -1,8 +1,9 @@
 package dndblocks;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
 
 public class DnDContentText extends DnDContent {
 
@@ -21,11 +22,16 @@ public class DnDContentText extends DnDContent {
 
 	Point textExtent = gc.textExtent(text);
 
-	Rectangle clipping = gc.getClipping();
-	double posX = (double) (clipping.width) / 2 - (double) (textExtent.x)
+	Point cellSize = getCell().getSize();
+	int clipMargin = 1;
+	gc.setClipping(clipMargin, clipMargin, cellSize.x - clipMargin,
+		cellSize.y - clipMargin);
+
+	double posX = ((double) (cellSize.x)) / 2 - ((double) (textExtent.x))
 		/ 2;
-	double posY = (double) (clipping.height) / 2 - (double) (textExtent.y)
+	double posY = ((double) (cellSize.y)) / 2 - ((double) (textExtent.y))
 		/ 2;
+	gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLACK));
 	gc.drawText(text, (int) posX, (int) posY);
     }
 
