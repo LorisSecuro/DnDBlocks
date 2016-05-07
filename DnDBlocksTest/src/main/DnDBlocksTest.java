@@ -17,9 +17,9 @@ public class DnDBlocksTest {
 	shell.setText("DnDGrid test");
 	shell.setLayout(new FillLayout());
 
-	DnDGrid dndGrid = new DnDGrid(shell, 0, 32, 3);
+	DnDGrid dndGrid = new DnDGrid(shell, 0, 15, 4);
 
-	new DnDContentText(dndGrid.getCell(12, 1), "Z");
+	new DnDContentText(dndGrid.getCell(12, 1), "12345");
 	new DnDContentText(dndGrid.getCell(13, 1), "Q");
 	new DnDContentText(dndGrid.getCell(10, 1), "W");
 	DnDContent x = new DnDContentText(dndGrid.getCell(11, 1), "H");
