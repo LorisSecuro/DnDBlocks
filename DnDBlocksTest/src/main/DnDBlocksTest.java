@@ -23,6 +23,7 @@ public class DnDBlocksTest {
 	new DnDContentText(dndGrid.getCell(13, 1), "Q");
 	new DnDContentText(dndGrid.getCell(10, 1), "W");
 	DnDContent x = new DnDContentText(dndGrid.getCell(11, 1), "H");
+	DnDContent x2 = new DnDContentText(dndGrid.getCell(11, 1), "X");
 	DnDContent w = new DnDContentText(dndGrid.getCell(12, 1), "I");
 	DnDContent n11 = new DnDContentText(dndGrid.getCell(13, 1), "!");
 
@@ -30,6 +31,7 @@ public class DnDBlocksTest {
 	myStructure.add(w);
 	myStructure.add(n11);
 	myStructure.add(x);
+	myStructure.add(x2);
 
 	shell.open();
 	while (!shell.isDisposed()) {

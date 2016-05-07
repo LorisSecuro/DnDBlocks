@@ -123,7 +123,10 @@ public class DnDCell extends Canvas {
 
     private void dropOperations(DnDContent contentToDrop) {
 	// remove from old cell
-	contentToDrop.getCell().removeContent(contentToDrop);
+	DnDCell oldCell = contentToDrop.getCell();
+	if (oldCell != null) {
+	    oldCell.removeContent(contentToDrop);
+	}
 
 	contentToDrop.setCell(DnDCell.this);
 	addContent(contentToDrop);
@@ -144,11 +147,12 @@ public class DnDCell extends Canvas {
 		    return;
 		}
 
-		DnDStructure structure = dragger.getContentOnTop()
-			.getStructure();
+		DnDContent contentDragged = dragger.getContentOnTop();
+		DnDStructure structure = contentDragged.getStructure();
 		if (structure != null) {
 		    List<DnDCell> structureCellsShifted = structure
-			    .getStructureCellsShiftedBy(dragger, DnDCell.this);
+			    .getStructureCellsShiftedBy(contentDragged,
+				    DnDCell.this);
 		    // if it was not able to get the cells to shift, I stop
 		    if (structureCellsShifted == null) {
 			return;
@@ -170,11 +174,12 @@ public class DnDCell extends Canvas {
 		    return;
 		}
 
-		DnDStructure structure = dragger.getContentOnTop()
-			.getStructure();
+		DnDContent contentDragged = dragger.getContentOnTop();
+		DnDStructure structure = contentDragged.getStructure();
 		if (structure != null) {
 		    List<DnDCell> structureCellsShifted = structure
-			    .getStructureCellsShiftedBy(dragger, DnDCell.this);
+			    .getStructureCellsShiftedBy(contentDragged,
+				    DnDCell.this);
 		    // if it was not able to get the cells to shift, I stop
 		    if (structureCellsShifted == null) {
 			return;
@@ -198,20 +203,31 @@ public class DnDCell extends Canvas {
 	    @Override
 	    public void drop(DropTargetEvent dropTargetEvent) {
 
-		DnDStructure structure = dragger.getContentOnTop()
-			.getStructure();
+		DnDContent contentDragged = dragger.getContentOnTop();
+		DnDStructure structure = contentDragged.getStructure();
 		if (structure != null) {
-		    Map<DnDCell, DnDContent> structureCellsShiftedAndCorrelatedContent = structure
+		    Map<DnDCell, List<DnDContent>> structureCellsShiftedAndCorrelatedContent = structure
 			    .getStructureCellsShiftedAndCorrelatedContent(
-				    dragger, DnDCell.this);
+				    contentDragged, DnDCell.this);
 
-		    for (Map.Entry<DnDCell, DnDContent> shiftedCellAndContent : structureCellsShiftedAndCorrelatedContent
+		    for (Map.Entry<DnDCell, List<DnDContent>> shiftedCellAndContent : structureCellsShiftedAndCorrelatedContent
 			    .entrySet()) {
 			DnDCell dropCell = shiftedCellAndContent.getKey();
-			DnDContent dropContent = shiftedCellAndContent
+			List<DnDContent> dropContents = shiftedCellAndContent
 				.getValue();
-			dropCell.getGrid().getPosition(dropCell);
-			dropCell.dropOperations(dropContent);
+			for (DnDContent dropContent : dropContents) {
+			    if (dropCell == null) {
+				// remove from old cell
+				DnDCell oldCell = dropContent.getCell();
+				if (oldCell != null) {
+				    dropContent.getCell().removeContent(
+					    dropContent);
+				    dropContent.setCell(null);
+				}
+			    } else {
+				dropCell.dropOperations(dropContent);
+			    }
+			}
 		    }
 		} else {
 		    dropOperations(dragger.getContentOnTop());
@@ -226,11 +242,12 @@ public class DnDCell extends Canvas {
 		    dropTargetEvent.detail = DND.DROP_NONE;
 		}
 
-		DnDStructure structure = dragger.getContentOnTop()
-			.getStructure();
+		DnDContent contentDragged = dragger.getContentOnTop();
+		DnDStructure structure = contentDragged.getStructure();
 		if (structure != null) {
 		    List<DnDCell> structureCellsShifted = structure
-			    .getStructureCellsShiftedBy(dragger, DnDCell.this);
+			    .getStructureCellsShiftedBy(contentDragged,
+				    DnDCell.this);
 		    // if it was not able to get the cells to shift, I stop
 		    if (structureCellsShifted == null) {
 			dropTargetEvent.detail = DND.DROP_NONE;

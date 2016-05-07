@@ -1,7 +1,7 @@
 package dndblocks;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,8 +9,11 @@ import org.eclipse.swt.graphics.Point;
 
 public class DnDStructure {
 
-    private Map<DnDContent, Point> distancesFromFirst = new HashMap<DnDContent, Point>();
+    // LinkedHashMap because i want to preserve the order they are inserted, so if there are contents
+    // in the same cell they get returned in order
+    private Map<DnDContent, Point> distancesFromFirst = new LinkedHashMap<DnDContent, Point>();
     private List<DnDContent> contents = new ArrayList<DnDContent>();
+    private boolean allowOutOfGrid = true;
 
     public DnDStructure() {
 
@@ -31,48 +34,74 @@ public class DnDStructure {
 	content.setStructure(this);
     }
 
+    public boolean getAllowOutOfGrid() {
+	return allowOutOfGrid;
+    }
+
+    public void setAllowOutOfGrid(boolean allowOutOfGrid) {
+	this.allowOutOfGrid = allowOutOfGrid;
+    }
+
     public List<DnDContent> getContents() {
 	return contents;
     }
 
-    public List<DnDCell> getStructureCellsShiftedBy(DnDCell shifted,
+    public List<DnDCell> getStructureCellsShiftedBy(DnDContent shiftedContent,
 	    DnDCell shifter) {
+	DnDCell shifted = shiftedContent.getCell();
 	Point shift = DnDStructure.getDistance(shifted, shifter);
 
 	List<DnDCell> structureCellsShifted = new ArrayList<DnDCell>();
-	Point positionOfFirst = getPositionOfFirst();
+	Point positionOfFirst = getPositionOfFirst(shiftedContent);
 	DnDCell shiftedCell = shifter.getGrid().getCell(
 		positionOfFirst.x + shift.x, positionOfFirst.y + shift.y);
+
 	if (shiftedCell == null) {
-	    return null;
+	    if (!allowOutOfGrid) {
+		return null;
+	    }
+	} else {
+	    structureCellsShifted.add(shiftedCell);
 	}
-	structureCellsShifted.add(shiftedCell);
 	for (Point distance : distancesFromFirst.values()) {
 	    shiftedCell = shifter.getGrid().getCell(
 		    positionOfFirst.x + distance.x + shift.x,
 		    positionOfFirst.y + distance.y + shift.y);
 	    if (shiftedCell == null) {
-		return null;
+		if (!allowOutOfGrid) {
+		    return null;
+		}
+	    } else {
+		structureCellsShifted.add(shiftedCell);
 	    }
-	    structureCellsShifted.add(shiftedCell);
 	}
 
 	return structureCellsShifted;
     }
 
-    public Map<DnDCell, DnDContent> getStructureCellsShiftedAndCorrelatedContent(
-	    DnDCell shifted, DnDCell shifter) {
+    public Map<DnDCell, List<DnDContent>> getStructureCellsShiftedAndCorrelatedContent(
+	    DnDContent shiftedContent, DnDCell shifter) {
+	DnDCell shifted = shiftedContent.getCell();
+
 	Point shift = DnDStructure.getDistance(shifted, shifter);
 
-	Map<DnDCell, DnDContent> structureCellsShiftedAndCorrelatedContent = new HashMap<DnDCell, DnDContent>();
-	Point positionOfFirst = getPositionOfFirst();
+	Map<DnDCell, List<DnDContent>> structureCellsShiftedAndCorrelatedContent = new LinkedHashMap<DnDCell, List<DnDContent>>();
+	Point positionOfFirst = getPositionOfFirst(shiftedContent);
 	DnDCell shiftedCell = shifter.getGrid().getCell(
 		positionOfFirst.x + shift.x, positionOfFirst.y + shift.y);
 	if (shiftedCell == null) {
-	    return null;
+	    if (!allowOutOfGrid) {
+		return null;
+	    }
 	}
+	List<DnDContent> contentsInKey = structureCellsShiftedAndCorrelatedContent
+		.get(shiftedCell);
+	if (contentsInKey == null) {
+	    contentsInKey = new ArrayList<DnDContent>();
+	}
+	contentsInKey.add(contents.get(0));
 	structureCellsShiftedAndCorrelatedContent.put(shiftedCell,
-		contents.get(0));
+		contentsInKey);
 
 	for (Map.Entry<DnDContent, Point> contentWithDistanceFromFirst : distancesFromFirst
 		.entrySet()) {
@@ -84,10 +113,18 @@ public class DnDStructure {
 			    + contentWithDistanceFromFirst.getValue().y
 			    + shift.y);
 	    if (shiftedCell == null) {
-		return null;
+		if (!allowOutOfGrid) {
+		    return null;
+		}
 	    }
+	    contentsInKey = structureCellsShiftedAndCorrelatedContent
+		    .get(shiftedCell);
+	    if (contentsInKey == null) {
+		contentsInKey = new ArrayList<DnDContent>();
+	    }
+	    contentsInKey.add(contentWithDistanceFromFirst.getKey());
 	    structureCellsShiftedAndCorrelatedContent.put(shiftedCell,
-		    contentWithDistanceFromFirst.getKey());
+		    contentsInKey);
 	}
 
 	return structureCellsShiftedAndCorrelatedContent;
@@ -104,11 +141,19 @@ public class DnDStructure {
 		- fromPosition.y);
     }
 
-    private Point getPositionOfFirst() {
-	DnDContent first = contents.get(0);
-	DnDCell cellOfFirst = first.getCell();
-	DnDGrid gridOfFirst = cellOfFirst.getGrid();
-	return gridOfFirst.getPosition(cellOfFirst);
+    // we don't know if first is in a cell, so the method require a reference cell that surely is in a cell
+    private Point getPositionOfFirst(DnDContent reference) {
+	DnDCell referenceCell = reference.getCell();
+	DnDGrid referenceGrid = referenceCell.getGrid();
+	Point referencePosition = referenceGrid.getPosition(referenceCell);
+	// if the reference is the first
+	if (reference == contents.get(0)) {
+	    return referencePosition;
+	}
+	Point distanceFromFirst = distancesFromFirst.get(reference);
+	Point positionOfFirst = new Point(referencePosition.x
+		- distanceFromFirst.x, referencePosition.y
+		- distanceFromFirst.y);
+	return positionOfFirst;
     }
-
 }
