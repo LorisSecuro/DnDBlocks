@@ -12,7 +12,9 @@ public abstract class DnDContent {
 
     protected DnDContent(DnDCell parentCell) {
 	this.parentCell = parentCell;
-	this.parentCell.addContent(this);
+	if (parentCell != null) {
+	    this.parentCell.addContent(this);
+	}
     }
 
     public DnDCell getCell() {

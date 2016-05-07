@@ -21,17 +21,48 @@ public class DnDStructure {
 
     public void add(DnDContent content) {
 
+	Point distanceFromFirst = new Point(0, 0);
+
 	if (!contents.isEmpty()) {
 	    DnDCell cellOfNewContent = content.getCell();
 	    DnDCell cellOfFirst = contents.get(0).getCell();
-	    Point distanceFromFirst = DnDStructure.getDistance(cellOfFirst,
+	    distanceFromFirst = DnDStructure.getDistance(cellOfFirst,
 		    cellOfNewContent);
+	}
 
+	add(content, distanceFromFirst);
+    }
+
+    public void add(DnDContent content, Point distanceFromFirst) {
+
+	if (!contents.isEmpty()) {
 	    distancesFromFirst.put(content, distanceFromFirst);
 	}
 
 	contents.add(content);
 	content.setStructure(this);
+    }
+
+    public static DnDStructure structureFromText(String contents, int size,
+	    DnDGrid grid, int xPosition, int yPosition) {
+	DnDStructure structure = new DnDStructure();
+	for (int i = 0; i < size; i++) {
+	    String stringContent = "";
+	    if (i < contents.length()) {
+		stringContent = contents.substring(i, i + 1);
+	    }
+	    DnDCell targetCell = grid.getCell(xPosition, yPosition);
+	    DnDContent content = new DnDContentText(targetCell, stringContent);
+	    structure.add(content, new Point(i, 0));
+	    xPosition++;
+	}
+	return structure;
+    }
+
+    public static DnDStructure structureFromText(String contents, DnDGrid grid,
+	    int xPosition, int yPosition) {
+	return structureFromText(contents, contents.length(), grid, xPosition,
+		yPosition);
     }
 
     public boolean getAllowOutOfGrid() {
